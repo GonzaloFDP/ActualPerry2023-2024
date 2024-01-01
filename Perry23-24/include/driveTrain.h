@@ -15,7 +15,7 @@ class driveTrain{
 
     driveTrain(double wheelD, double wheelDist){
         wheelDia = wheelD;
-        wheelCirc = wheelDia * M_PI;
+        wheelCirc = wheelD * M_PI;
         robotCirc = wheelDist * M_PI;
         robotDia = wheelDist;
     }
@@ -24,20 +24,24 @@ class driveTrain{
     double wheelCirc;
     double robotCirc;
     double robotDia;
-    double gearR = 57/100; //driven/drive
+    double gearR = 600/343; //drive/driven
     double ticksInRev = 300;
 
-    double driveKP = 0;
-    double driveKD = 0;
-    double turningKP = 0;
-    double turningKD = 0;
+    double driveKP=0.6;
+    double driveKI=0;
+    double driveKD=0.75;
+    double turnKP=2.8;
+    double turnKI=0.0003;
+    double turnKD=0.55;
 
     //Converts distance (inches) into the AMOUNT OF ENCODER TICKS THE MOTOR NEEDS TO TURN
     double distToTicks(double dist){
         double ticks = dist;
-        ticks /= wheelCirc;
-        ticks /= gearR;
-        ticks *= ticksInRev;
+        ticks /= 4;
+        ticks /= M_PI;
+        ticks *= 300;
+        ticks *= 600; /// drive
+        ticks /= 343; /// dirven
         return ticks;
     }
 
@@ -45,9 +49,9 @@ class driveTrain{
     double degToTicks(double degrees){
         //Arc length = radius * angle(radians)
         //1. Convert from degrees to radians
-        double rad = degToRad(deg);
+        double rad = degrees*M_PI/180;
         //2. Use Arc Length formula to find the distance the wheels have to move;
-        double dist = wheelDia/2 * rad;
+        double dist = 2*M_PI * rad;
         //3. Convert to ticks
         double ticks = distToTicks(dist);
         return ticks;

@@ -17,14 +17,19 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 
-driveTrain perry(4,11.65625);
-
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
-	
+	pros::Task intake_task(intake_t);
+	Flywheel.set_brake_mode(MOTOR_BRAKE_COAST);
+	Intake.set_brake_mode(MOTOR_BRAKE_HOLD);
+	endgame.set_value(0);
+	blockerblocker.set_value(0);
+	wings.set_value(0);
+	leftRotate.reset_position();
+	backRotate.reset_position();
+	Inertial.reset();
+	autonSelector();
+	//turnPID(perry.degToTicks(45), perry.turnKP,perry.turnKI,perry.turnKD);
+	//drivePID(perry.distToTicks(24), perry.driveKP,perry.driveKI,perry.driveKD); //fix dist to ticks function
 }
 
 /**
@@ -56,7 +61,25 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	switch (selectedAuton){
+		case 0:
+			OverAWP5Points();
+			break;
+		case 1:
+			OverAWP();
+			break;
+		case 2:
+			//progSkills();
+			break;
+		case 3:
+			UnderAWP();
+			break;
+		case 4:
+			UnderAWP5Points();
+			break;
+	}
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -71,38 +94,121 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void intake (void *param){
-	while(true){
-		Intake.move_velocity(intakeSpeed*intakeDirection);
-		pros::delay(10);
-	}
-}
+
 
 void opcontrol() {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_mtr(1);
-	pros::Motor right_mtr(2);
-
+	pros::Task flywheel_task(flywheel_t);
+	
 	while (true) {
+		
 		//Multitasking
-		pros::Task intake_task(intake);
 		//Movement
 		driveFunc(master.get_analog(ANALOG_LEFT_Y),master.get_analog(ANALOG_RIGHT_X));
 		//------------Mechanisms---------------//
 		//Intake
-		if(intakeSpeed == 0 && master.get_digital_new_press(DIGITAL_L1)){
-			intakeSpeed = 200;
-		} else if (intakeSpeed == 200 && master.get_digital_new_press(DIGITAL_L1)){
-			intakeSpeed = 0;
-		}
-		if(intakeDirection == 1 && master.get_digital_new_press(DIGITAL_L2)){
-			intakeDirection = -1;
-		} else if (intakeDirection == -1 && master.get_digital_new_press(DIGITAL_L2)){
+		
+		if(master.get_digital_new_press(DIGITAL_L1)){
 			intakeDirection = 1;
+			if(intakeSpeed == 300){
+				intakeSpeed = 0;
+			} else if(intakeSpeed == 0){
+				intakeSpeed = 300;
+			}
+		} else if(master.get_digital_new_press(DIGITAL_L2)){
+			intakeDirection = -1;
+			if(intakeSpeed == 300){
+				intakeSpeed = 0;
+			} else if(intakeSpeed == 0){
+				intakeSpeed = 300;
+			}
 		}
 
+		//Flywheel
+		if(master.get_digital_new_press(DIGITAL_R1)){
+			if (abs(flywheelSpeed) == 600){
+				flywheelSpeed = 0;
+			} else if (flywheelSpeed == 0){
+				flywheelSpeed = 600*highArc;
+			}
+		}
 
+		if(master.get_digital_new_press(DIGITAL_R2)){
+			if (highArc == 1){
+				highArc = -1;
+			} else if (highArc == -1){
+				highArc = 1;
+			}
+		}
 
-		pros::delay(20);
+		//Blocker blocker
+		if(master.get_digital_new_press(DIGITAL_UP)){ //Matchload mode
+			blockerblocker.set_value(1);
+		} else if (master.get_digital_new_press(DIGITAL_DOWN)){ //Ingame mode
+			blockerblocker.set_value(0);
+		}
+
+		//Wings
+		if(master.get_digital_new_press(DIGITAL_RIGHT)){
+			wings.set_value(1);
+			
+		} else if (master.get_digital_new_press(DIGITAL_LEFT)){
+			
+			wings.set_value(0);
+		}
+
+		if(master.get_digital_new_press(DIGITAL_Y)){
+			if(holdingMotors){
+				coastMotors();
+				holdingMotors = false;
+			} else if (holdingMotors == false){
+				holdMotors();
+				holdingMotors = true;
+			}
+		}	
+
+		if(master.get_digital_new_press(DIGITAL_X)){
+			endgame.set_value(1);
+		} else if (master.get_digital_new_press(DIGITAL_B)){
+			endgame.set_value(0);
+		}
+		
+		if(master.get_digital_new_press(DIGITAL_A)){
+			/*switch (selectedAuton){
+				case 0:
+					OverPreload();
+					break;
+				case 1:
+					OverAWP();
+					break;
+				case 2:
+					UnderPreload();
+					break;
+				case 3:
+					UnderAWP();
+					break;
+				case 4:
+					UnderAWP5Points();
+					break;
+			}*/
+			switch (selectedAuton){
+				case 0:
+					OverAWP5Points();
+					break;
+				case 1:
+					OverAWP();
+					break;
+				case 2:
+					progSkills();
+					break;
+				case 3:
+					UnderAWP();
+					break;
+				case 4:
+					UnderAWP5Points();
+					break;
+			}
+		}
+		pros::delay(10);
+		
 	}
 }

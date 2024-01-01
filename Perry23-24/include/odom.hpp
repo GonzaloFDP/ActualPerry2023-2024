@@ -1,13 +1,12 @@
 #include "main.h"
 #include "motorSetup.h"
 
-pros::Rotation leftRotate(1);
 pros::Rotation sideRotate(2);
 pros::Rotation rightRotate(3);
 pros::IMU inertial(4);
 
 double xPosition = 0; //
-double yPosition = 0; // << GLOBAL variables so that they can be used elsewhere in the code
+double yPosition = 0; // <- GLOBAL variables so that they can be used elsewhere in the code
 
 void odom(){
     //Keep track of wheel rotation values
@@ -30,9 +29,9 @@ void odom(){
         // Using inertial: double deltaInertial = inertial.get_rotation() - prevAngle;
 
         //convert ticks to inches (ticks - > turns - > inches) NOTES: atan(1) * 4 = pi; divide by 36000 to get the # of turns
-        deltaLeft *= (atan(1)4 * leftTrackDia)/36000;
-        deltaRight *= (atan(1)4 * rightTrackDia)/36000;
-        deltaSide *= (atan(1)4 * sideTrackDia)/36000;
+        deltaLeft *= (atan(1)*4 * leftTrackDia)/36000;
+        deltaRight *= (atan(1)*4 * rightTrackDia)/36000;
+        deltaSide *= (atan(1)*4 * sideTrackDia)/36000;
         //Using inertial: 
 
         //Calculate how much the robot has turned (without using an inertial)
@@ -47,13 +46,13 @@ void odom(){
 
         if(deltaTheta == 0){ //The robot DID NOT turn
             localDeltaX = deltaSide; //deltaSide tracks how much the robot moved left / right
-            localDeltaY = deltaLeft: // deltaLeft OR deltaRight track how much the robot moved forwards / backwards
+            localDeltaY = deltaLeft; // deltaLeft OR deltaRight track how much the robot moved forwards / backwards
         } else { //robot DID turn
             double radiusFront = deltaLeft/deltaTheta - leftDistance;
             double radiusSide = deltaSide/deltaTheta - sideDistance;
 
-            localDeltaX = 2 * radiusSide * sin(angleChange/2);
-            localDeltaY = 2 *  radiusFront * sin(angleChange/2);
+            localDeltaX = 2 * radiusSide * sin(deltaTheta/2);
+            localDeltaY = 2 *  radiusFront * sin(deltaTheta/2);
         }
 
         //Convert LOCAL -> GLOBAL change (relative to the field itself)
@@ -71,7 +70,7 @@ void odom(){
         prevLeft = leftRotate.get_position();
         prevRight = rightRotate.get_position();
         prevSide = sideRotate.get_position();
-        anglePrev = anglePrev + deltaTheta;
+        prevAngle = prevAngle + deltaTheta;
         //Using inertial: anglePrev = inertial.get_rotation();
 
     }
