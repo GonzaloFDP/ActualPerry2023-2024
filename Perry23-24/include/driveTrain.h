@@ -24,26 +24,27 @@ class driveTrain{
     double wheelCirc;
     double robotCirc;
     double robotDia;
-    double gearR = 600/343; //drive/driven
+    double gearR = 4/3; //drive/driven
     double ticksInRev = 300;
 
     double driveKP=0.6;
-    double driveKI=0;
-    double driveKD=0.75;
-    double turnKP=2.8;
+    double driveKI=0.001;
+    double driveKD=0.5;
+    double turnKP=2.5;
     double turnKI=0.0003;
-    double turnKD=0.55;
+    double turnKD=0;
 
-    //Converts distance (inches) into the AMOUNT OF ENCODER TICKS THE MOTOR NEEDS TO TURN
+    //Converts distance (inches) into the AMOUNT OF ENCODER  TICKS THE MOTOR NEEDS TO TURN
     double distToTicks(double dist){
         double ticks = dist;
-        ticks /= 4;
+        ticks /= 3.25;
         ticks /= M_PI;
         ticks *= 300;
-        ticks *= 600; /// drive
-        ticks /= 343; /// dirven
+        ticks *= 4; /// drive
+        ticks /= 3; /// driven
         return ticks;
     }
+
 
     //Function for turning in place (CLOCKWISE)
     double degToTicks(double degrees){

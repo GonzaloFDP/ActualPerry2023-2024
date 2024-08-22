@@ -8,15 +8,33 @@ double degToRad(int deg){
     return rad;
 }
 
+double ticksToDist(double tick){
+        double dist = tick;
+        dist *= 4;
+        dist *= M_PI;
+        dist /= 300;
+        dist /= 600; /// drive
+        dist *= 343; /// dirven
+        return dist;
+    }
+
 //Variables
 int intakeSpeed = 0;
 int intakeDirection = 1; //Pos = intake, neg = outtake
 int flywheelSpeed = 0;
 int highArc = 1;
 double holdingMotors = false;
+double kBuffer = 20;
+double leftBuffer=0;
+double rightBuffer=0;
+bool driveStraight = false;
+bool wingsOut = false;
+bool hangOut = false;
+
+bool driveTrainReverse=false;
 
 
-//AUton Selector
+//Auton Selector
 int numAutons = 5;
 int selectedAuton=0;
 std::string autons[5]={"Over AWP 5","Over AWP","Progskills", "Under AWP", "Under AWP 5"};
@@ -35,30 +53,41 @@ void autonSelector(){
         }
         master.print(0,0,"%s", autons[selectedAuton]);
     }
+    master.rumble("----");
+    pros::delay(100);
     master.clear();
     pros::delay(2000);
 }
 
 //Movement
 
-
 void driveFunc(double power, double turn){
     double left;
     double right;
-    left = power + (turn*0.7);
-    right = power - (turn*0.7);
+    left = power + (turn*0.6);
+    right = power - (turn*0.6);
     //Plugging this into a cubed function (600x^3)/(127^3)
     double leftCubed = 600*left*left*left;
     leftCubed /= (127*127*127);
     double rightCubed = 600*right*right*right;
     rightCubed /= (127*127*127);
 
-    FLeft.move_velocity(leftCubed);
-    MLeft.move_velocity(leftCubed);
-    BLeft.move_velocity(leftCubed);
-    FRight.move_velocity(rightCubed);
-    MRight.move_velocity(rightCubed);
-    BRight.move_velocity(rightCubed);
+
+    if(driveTrainReverse==false){
+        FLeft.move_velocity(leftCubed);
+        MLeft.move_velocity(leftCubed);
+        BLeft.move_velocity(leftCubed);
+        FRight.move_velocity(rightCubed);
+        MRight.move_velocity(rightCubed);
+        BRight.move_velocity(rightCubed);
+    } else if(driveTrainReverse==true){
+        FLeft.move_velocity(-rightCubed);
+        MLeft.move_velocity(-rightCubed);
+        BLeft.move_velocity(-rightCubed);
+        FRight.move_velocity(-leftCubed);
+        MRight.move_velocity(-leftCubed);
+        BRight.move_velocity(-leftCubed);
+    }
 }
 
 void driveMotors(double ticks, int time){
@@ -122,36 +151,75 @@ void coastMotors(){
 
 void drivePID (double target, double Kp, double Ki, double Kd){
     tareDriveMotors();
-    double threshold = 300;
+    Inertial.tare_rotation();
+    double threshold = 600;
     double integral = 0;
-    double output;
-    double prevError = 0;
-    double error=6;
+    /*double leftIntegral = 0;
+    double rightIntegral = 0;*/
+    double output = 0;
+    double bufferOutput = 0;
+    /*double leftOutput;
+    double rightOutput;*/
+    double prevError=0;
+    double bufferPrevError=0;
+    /*double leftPrevError = 0;
+    double rightPrevError = 0;*/
+    double error;
+    double bufferError;
+    double bufferKp=5;
+    double bufferKd=3.7;
+    /*double leftError=0;
+    double rightError=0;*/
     while (true){
             double leftSideMotors = (FLeft.get_position() + MLeft.get_position() + BLeft.get_position())/3;
             double rightSideMotors = (FRight.get_position() + MRight.get_position() + BRight.get_position())/3;
-            double avgMotors = (leftSideMotors+rightSideMotors)/2;
+            double avgMotors = (rightSideMotors+leftSideMotors)/2;
 
-            error = target - avgMotors;
+            //=============Seperate Motor Balderdash=============
+
+           /* leftError = target - leftSideMotors;
+            rightError = target - rightSideMotors;
+
+
+            leftIntegral += leftError;
+            rightIntegral += rightError;
+
+            leftOutput = leftError * Kp + leftIntegral * Ki + (leftError-leftPrevError) * Kd;
+            rightOutput = rightError * Kp + rightIntegral * Ki + (rightError-rightPrevError) * Kd;*/
+
+            error=target-avgMotors;
+            bufferError = -Inertial.get_rotation();
 
             integral += error;
 
-            if(fabs(error) > threshold){
+            if(fabs(error)>threshold){
                 integral = 0;
             }
 
-            output = error * Kp + integral * Ki + (error-prevError) * Kd;
+            output = error * Kp + integral *Ki + (error-prevError) * Kd;
+            bufferOutput = bufferError * bufferKp + (bufferError-bufferPrevError)*bufferKd;
 
-            FLeft.move_velocity(output);
-            MLeft.move_velocity(output);
-            BLeft.move_velocity(output);
-            FRight.move_velocity(output);
-            MRight.move_velocity(output);
-            BRight.move_velocity(output);
+            //if(leftOutput<rightOutput){
+            //    rightOutput=leftOutput;
+            //} else if (rightOutput<leftOutput){
+             //   leftOutput=rightOutput;
+            //}
+
+            FLeft.move_velocity(output+bufferOutput);
+            MLeft.move_velocity(output+bufferOutput);
+            BLeft.move_velocity(output+bufferOutput);
+            FRight.move_velocity(output-bufferOutput);
+            MRight.move_velocity(output-bufferOutput);
+            BRight.move_velocity(output-bufferOutput);
 
             prevError = error;
-            master.print(1,0,"%d,%d,%d", (int)FRight.get_position(), (int) MRight.get_position(), (int)BRight.get_position());
-            if(fabs(prevError)-fabs(error)<2 && fabs(error)<5){
+            bufferPrevError = bufferError;
+
+            //master.print(1,0,"%d, %d, %d, %d",(int)Inertial.get_rotation(),(int)leftSideMotors, (int)rightSideMotors, (int)target);
+            master.print(2,0,"%d,%d,%d", (int)ticksToDist(FRight.get_position()), (int)ticksToDist(MRight.get_position()), (int)ticksToDist(BRight.get_position()));
+            //master.print(2,0,"%d,%d,%d", (int)ticksToDist(FRight.get_position()), (int) ticksToDist(MRight.get_position()), (int)ticksToDist(BRight.get_position()));
+            // && fabs(bufferError)<3 && (fabs(bufferPrevError)-fabs(bufferError))<2
+            if((fabs(prevError)-fabs(error))<2 && fabs(error)<5){
                 break;
             }
             pros::delay(20);
@@ -164,24 +232,24 @@ void drivePID (double target, double Kp, double Ki, double Kd){
     BRight.move_velocity(0);*/
 }
 
+
 void intake_t (void *param){
 	while(true){
-		Intake.move_velocity(intakeSpeed*intakeDirection);
+		Left_Intake.move_velocity(intakeSpeed*intakeDirection);
+        Right_Intake.move_velocity(intakeSpeed*intakeDirection);
 		pros::delay(10);
 	}
 }
 
-void flywheel_t (void *param){
-	while(true){
-		Flywheel.move_velocity(flywheelSpeed);
-		pros::delay(10);
-	}
-}
+
 
 
 void autonTurning(double target, double Kp, double Ki, double Kd){
     Inertial.set_rotation(0);
     double error = target-Inertial.get_rotation();
+    if(fabs(error) > 180){
+        target -= 360;
+    }
     double prevError = 0;
     double integral = 0;
     double threshold = 20;
@@ -193,7 +261,7 @@ void autonTurning(double target, double Kp, double Ki, double Kd){
             integral = 0;
         }
 
-        double power = error * Kp + integral * Ki + prevError * Kd;
+        double power = error * Kp + integral * Ki + (error-prevError) * Kd;
         FRight.move_velocity(-1*power);
         MRight.move_velocity(-1*power);
         BRight.move_velocity(-1*power);

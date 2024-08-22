@@ -1,5 +1,6 @@
 #include "main.h"
 #include "driveTrain.h"
+#include "pros/rtos.hpp"
 driveTrain perry(4,13.5);
 //Over side
 /*void OverPreload(){
@@ -131,194 +132,184 @@ void UnderAWP5Points(){
 }*/
 
 void OverAWP(){
-    /*wings.set_value(1);
-    pros::delay(100);
-    autonTurning(-75,3,perry.turnKI,perry.turnKD);
-    pros::delay(300);
-    autonTurning(30,3,perry.turnKI,perry.turnKD);
-	wings.set_value(0);
-    pros::delay(100);
-    drivePID(perry.distToTicks(-12),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(500);
-    autonTurning(-83,3,perry.turnKI,perry.turnKD);
-    pros::delay(300);
-    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(300);
-    blockerblocker.set_value(0);*/
-   
-   //==========================================
-
-    wings.set_value(1);
-    drivePID(perry.distToTicks(-18),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(200);
-    autonTurning(45,3,perry.turnKI,perry.turnKD);
-    wings.set_value(0);
-    pros::delay(100);
-    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(100);
-    autonTurning(-96,3,perry.turnKI,perry.turnKD);
-    pros::delay(100);
-    drivePID(perry.distToTicks(50),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(100);
-    autonTurning(15,3,perry.turnKI,perry.turnKD);
-    blockerblocker.set_value(1);
-
     //==========================================
-
-   /* wings.set_value(0);
-    pros::delay(100);
-    autonTurning(-45,3,perry.turnKI,perry.turnKD);
-    pros::delay(200);
-    autonTurning(45,3,perry.turnKI,perry.turnKD);
+    double totalDirection = 47;
+    drivePID(perry.distToTicks(-7),perry.driveKP, perry.driveKI, perry.driveKD);
     wings.set_value(1);
     pros::delay(200);
+    autonTurning(0-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    wings.set_value(0);
+    pros::delay(600);
+    autonTurning(30-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    drivePID(perry.distToTicks(15),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(0-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    intakeDirection=-1;
+    intakeSpeed=500;
+    totalDirection += Inertial.get_rotation();
+    pros::delay(300);
+    wings.set_value(0);
     drivePID(perry.distToTicks(28),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(200);
-    autonTurning(135,3,perry.turnKI,perry.turnKD);
-    pros::delay(200);
-    intakeDirection=-1;
-    intakeSpeed=600;
-    pros::delay(150);
-    driveMotors(perry.distToTicks(14),1000);
-    pros::delay(150);
-    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);*/
-
-    /*drivePID(perry.distToTicks(25),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(200);
-    autonTurning(45,3,perry.turnKI,perry.turnKD);
-    pros::delay(200);
-    intakeDirection=-1;
-    intakeSpeed=600;
-    pros::delay(150);
-    driveMotors(perry.distToTicks(14),1000);
-    pros::delay(150);
+    stopDriveMotors();
+    pros::delay(1500);
     intakeSpeed=0;
-    drivePID(perry.distToTicks(-14),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(200);
-    autonTurning(-45,3,perry.turnKI,perry.turnKD);
-    pros::delay(200);
-    drivePID(perry.distToTicks(-23),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(200);
-    autonTurning(-135,3,perry.turnKI,perry.turnKD);*/
+    intakeDirection=1;
+    //==========================================
 }
 
 void OverAWP5Points(){
-    drivePID(perry.distToTicks(25),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(200);
+    /*drivePID(perry.distToTicks(17),perry.driveKP, perry.driveKI, perry.driveKD);
+    pros::delay(100);
     autonTurning(45,3,perry.turnKI,perry.turnKD);
-    pros::delay(200);
+    pros::delay(100);
+    drivePID(perry.distToTicks(5),perry.driveKP, perry.driveKI, perry.driveKD);
     intakeDirection=-1;
-    intakeSpeed=600;
-    pros::delay(150);
-    driveMotors(perry.distToTicks(14),1000);
-    pros::delay(150);
+    intakeSpeed=500;
+    pros::delay(100);
+    driveMotors(perry.distToTicks(10),1300);
+    drivePID(perry.distToTicks(-9),perry.driveKP, perry.driveKI, perry.driveKD);
     intakeSpeed=0;
-    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(200);
-    autonTurning(-45,3,perry.turnKI,perry.turnKD);
-    pros::delay(200);
-    wings.set_value(1);
-    drivePID(perry.distToTicks(-24),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(200);
+    autonTurning(-30,3,perry.turnKI,perry.turnKD);
+    endgame.set_value(1);
+    drivePID(perry.distToTicks(-16),perry.driveKP, perry.driveKI, perry.driveKD);
+    pros::delay(100);
+    autonTurning(-30,3,perry.turnKI,perry.turnKD);
+    endgame.set_value(0);*/
+    driveMotors(-perry.distToTicks(31),1300);
+    drivePID(perry.distToTicks(21),perry.driveKP, perry.driveKI, perry.driveKD);
+    /*autonTurning(-177,3,perry.turnKI,perry.turnKD);
+    endgame.set_value(1);
+    pros::delay(100);
+    drivePID(perry.distToTicks(-22),perry.driveKP, perry.driveKI, perry.driveKD);
     autonTurning(-45,3,perry.turnKI,perry.turnKD);
     pros::delay(100);
-    autonTurning(-45,3,perry.turnKI,perry.turnKD);
+    drivePID(perry.distToTicks(10),perry.driveKP, perry.driveKI, perry.driveKD);
+    endgame.set_value(0);*/
 }
 void testAuton(){
-    drivePID(perry.distToTicks(12), perry.driveKP, perry.driveKI, perry.driveKD);
+    drivePID(perry.distToTicks(24),perry.driveKP, perry.driveKI, perry.driveKD);
 }
 
 void UnderAWP(){
-    /*autonTurning(53,perry.turnKP,perry.turnKI,perry.turnKD);
-    pros::delay(100);
-    drivePID(perry.distToTicks(28),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(200);
-    autonTurning(-42,perry.turnKP,perry.turnKI,perry.turnKD);
-    intakeDirection=-1;
-    intakeSpeed=500;
-    pros::delay(400);
-    driveMotors(perry.distToTicks(12),1500);
-    pros::delay(200);
-    intakeSpeed=0;
-    pros::delay(100);
-    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(50);
-    autonTurning(55,perry.turnKP,perry.turnKI,perry.turnKD);
-    pros::delay(50);
-    drivePID(perry.distToTicks(-36),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(50);
-    autonTurning(27,perry.turnKP,perry.turnKI,perry.turnKD);
-    pros::delay(150);
-    drivePID(perry.distToTicks(-20),perry.driveKP, perry.driveKI, perry.driveKD);
-    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKoikoI, perry.driveKD);*/
-    drivePID(perry.distToTicks(47),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(50);
-    autonTurning(90,perry.turnKP,perry.turnKI,perry.turnKD);
-    pros::delay(100);
-    intakeDirection=-1;
-    intakeSpeed=500;
-    pros::delay(300);
-    driveMotors(perry.distToTicks(19),1600);
-    pros::delay(100);
-    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(100);
-    driveMotors(perry.distToTicks(16),1600);
-    pros::delay(100);
-    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);
-    intakeSpeed=0;
+    driveMotors(-perry.distToTicks(33),1300);
+    drivePID(perry.distToTicks(14),perry.driveKP, perry.driveKI, perry.driveKD);
 }
 
 void UnderAWP5Points(){
-    drivePID(perry.distToTicks(53),perry.driveKP, perry.driveKI, perry.driveKD);
+    /*drivePID(perry.distToTicks(40),perry.driveKP, perry.driveKI, perry.driveKD);
     pros::delay(50);
     autonTurning(90,perry.turnKP,perry.turnKI,perry.turnKD);
-    pros::delay(100);
+    //pros::delay(100);
     intakeDirection=-1;
     intakeSpeed=500;
     pros::delay(300);
-    driveMotors(perry.distToTicks(12),300);
+    driveMotors(perry.distToTicks(16),600);
     pros::delay(100);
     intakeSpeed=0;
     pros::delay(100);
-    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);
+    drivePID(perry.distToTicks(-20),perry.driveKP, perry.driveKI, perry.driveKD);
     pros::delay(100);
-    autonTurning(160,perry.turnKP,perry.turnKI,perry.turnKD);
+    autonTurning(140,perry.turnKP,perry.turnKI,perry.turnKD);
     intakeDirection=1;
     intakeSpeed=500;
     pros::delay(100);
-    drivePID(perry.distToTicks(30),perry.driveKP, perry.driveKI, perry.driveKD);
+    drivePID(perry.distToTicks(24),perry.driveKP, perry.driveKI, perry.driveKD);
     pros::delay(200);
     intakeSpeed=0;
     drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);
     pros::delay(100);
-    autonTurning(160,perry.turnKP,perry.turnKI,perry.turnKD);
+    autonTurning(185,perry.turnKP,perry.turnKI,perry.turnKD);
     pros::delay(100);
     drivePID(perry.distToTicks(10),perry.driveKP, perry.driveKI, perry.driveKD);
-    pros::delay(100);
-    autonTurning(20,perry.turnKP,perry.turnKI,perry.turnKD);
-    pros::delay(150);
     intakeDirection=-1;
     intakeSpeed=500;
     pros::delay(300);
-    driveMotors(perry.distToTicks(16),1500);
+    driveMotors(perry.distToTicks(14),1000);
     pros::delay(200);
     intakeSpeed=0;
-    pros::delay(100);
+    pros::delay(100);  
     drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(-135,perry.turnKP,perry.turnKI,perry.turnKD);
+    pros::delay(100);
+    intakeDirection=1;
+    intakeSpeed=500;
+    drivePID(perry.distToTicks(24),perry.driveKP, perry.driveKI, perry.driveKD);
+    pros::delay(100);
+    intakeSpeed=0;
+    drivePID(perry.distToTicks(-5),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(180,perry.turnKP,perry.turnKI,perry.turnKD);
+    intakeDirection=-1;
+    intakeSpeed=500;
+    pros::delay(300);
+    driveMotors(perry.distToTicks(26),150
+    intakeSpeed=0;
+    drivePID(perry.distToTicks(-10),perry.driveKP, perry.driveKI, perry.driveKD);*/
+    double totalDirection = -45;
+    drivePID(perry.distToTicks(16),perry.driveKP, perry.driveKI, perry.driveKD);
+    totalDirection += Inertial.get_rotation();
+    autonTurning(-86-(totalDirection),perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    intakeDirection=-1;
+    intakeSpeed=500;
+    wings.set_value(0);
+    pros::delay(150);
+    driveMotors(perry.distToTicks(25),800);
+    intakeSpeed=0;
+    drivePID(perry.distToTicks(-30),perry.driveKP, perry.driveKI, perry.driveKD);
+    totalDirection += Inertial.get_rotation();
+    autonTurning(-136-(totalDirection),perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    intakeDirection=1;
+    intakeSpeed=500;
+    drivePID(perry.distToTicks(62),perry.driveKP, perry.driveKI, perry.driveKD);
+    totalDirection += Inertial.get_rotation();
+    intakeSpeed=0;
+    pros::delay(100);
+    autonTurning(10-(totalDirection),perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    intakeDirection=-1;
+    intakeSpeed=500;
+    wings.set_value(1);
+    pros::delay(150);
+    driveMotors(perry.distToTicks(48),1200);
+    wings.set_value(0);
+    intakeSpeed=0;
+    drivePID(perry.distToTicks(-25),perry.driveKP, perry.driveKI, perry.driveKD);
+    totalDirection += Inertial.get_rotation();
+    autonTurning(135-(totalDirection),perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    intakeDirection=1;
+    intakeSpeed=300;
+    drivePID(perry.distToTicks(20),perry.driveKP, perry.driveKI, perry.driveKD);
+    totalDirection += Inertial.get_rotation();
+    intakeSpeed=0;
+    driveMotors(perry.distToTicks(-15),1300);
+    autonTurning(0-(totalDirection),perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    wings.set_value(1);
+    intakeDirection=-1;
+    intakeSpeed=500;
+    driveMotors(perry.distToTicks(21),1500);
+    totalDirection += Inertial.get_rotation();
+    intakeSpeed=0;
+    wings.set_value(0);
+    drivePID(perry.distToTicks(-14),perry.driveKP, perry.driveKI, perry.driveKD);
+    totalDirection += Inertial.get_rotation();
 }
 
 
+
 void progSkills(){
-    driveMotors(-25,1500);
-    pros::delay(100);
-    drivePID(perry.distToTicks(10),perry.driveKP, perry.driveKI, perry.driveKD);
-    autonTurning(-90,perry.turnKP,perry.turnKI,perry.turnKD);
-    pros::delay(50);
-    driveMotors(-6,500);
-    pros::delay(50);
+    double totalDirection = -50;
+    drivePID(perry.distToTicks(4),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(11,perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    drivePID(perry.distToTicks(-3),perry.driveKP, perry.driveKI, perry.driveKD);
     holdMotors();
     flywheelSpeed = 600;
-    for(int i = 0; i < 40; i++){
+    pros::delay(1000);
+    for(int i = 0; i < 24; i++){
         FLeft.move_velocity(0);
         MLeft.move_velocity(0);
         BLeft.move_velocity(0);
@@ -327,6 +318,78 @@ void progSkills(){
         BRight.move_velocity(0);
         pros::delay(1000);
     }
+    flywheelSpeed = 0;
+    coastMotors();
+    drivePID(perry.distToTicks(4),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(-135-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    drivePID(perry.distToTicks(-8.5),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(-195-(totalDirection),perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    drivePID(perry.distToTicks(-76),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(135-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation(); 
+    drivePID(perry.distToTicks(-22),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(90-totalDirection, perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    driveMotors(perry.distToTicks(-21),1000);
+    driveMotors(perry.distToTicks(10),1000);
+    driveMotors(perry.distToTicks(-14),1000);
+    drivePID(perry.distToTicks(3),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(135-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    drivePID(perry.distToTicks(12),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(-155-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    drivePID(perry.distToTicks(42),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(-30-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    intakeDirection=-1;
+    intakeSpeed = 500;
+    wings.set_value(1);
+    pros::delay(500);
+    driveMotors(perry.distToTicks(25),1500);
+    driveMotors(perry.distToTicks(-10),1000);
+    driveMotors(perry.distToTicks(13),1000);
+    wings.set_value(0);
+    intakeSpeed = 0;
+    drivePID(perry.distToTicks(-20),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(-90-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    drivePID(perry.distToTicks(48),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning(35-(totalDirection), perry.turnKP,perry.turnKI,perry.turnKD);
+    totalDirection += Inertial.get_rotation();
+    intakeDirection=-1;
+    intakeSpeed = 500;
+    wings.set_value(1);
+    pros::delay(500);
+    driveMotors(perry.distToTicks(25),1500);
+    driveMotors(perry.distToTicks(-15),1000);
+    driveMotors(perry.distToTicks(18),1000);
+    wings.set_value(0);
+    intakeSpeed = 0;
+    driveMotors(perry.distToTicks(-20),1000);
+
+    /*
+    [======]-[=====]-[====]-[===]-[==]-[=] Over Pipe [=]-[==]-[===]-[====]-[=====]-[======]
+
+    autonTurning(-9,perry.turnKP,perry.turnKI,perry.turnKD);
+    drivePID(perry.distToTicks(52),perry.driveKP, perry.driveKI, perry.driveKD);
+    autonTurning((45-Inertial.get_rotation()),perry.turnKP,perry.turnKI,perry.turnKD);
+    driveMotors(perry.distToTicks(-30),1500);
+    intakeDirection=-1;
+    intakeSpeed = 500;
+    wings.set_value(1);
+    pros::delay(500);
+    driveMotors(perry.distToTicks(84),4500);
+    autonTurning((45-Inertial.get_rotation()),perry.turnKP,perry.turnKI,perry.turnKD);
+    driveMotors(perry.distToTicks(54),1500);
+    driveMotors(perry.distToTicks(-10),700);
+    autonTurning((45-Inertial.get_rotation()),perry.turnKP,perry.turnKI,perry.turnKD);
+    driveMotors(perry.distToTicks(15),700);
+    wings.set_value(0);
+    intakeSpeed = 0;
+    driveMotors(perry.distToTicks(-15),1000);*/
 }
 
 

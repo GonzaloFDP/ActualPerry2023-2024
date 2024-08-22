@@ -20,8 +20,9 @@ void on_center_button() {
 void initialize() {
 	pros::Task intake_task(intake_t);
 	Flywheel.set_brake_mode(MOTOR_BRAKE_COAST);
-	Intake.set_brake_mode(MOTOR_BRAKE_HOLD);
-	endgame.set_value(0);
+	Left_Intake.set_brake_mode(MOTOR_BRAKE_HOLD);
+	Right_Intake.set_brake_mode(MOTOR_BRAKE_HOLD);
+	endgame.set_value(1);
 	blockerblocker.set_value(0);
 	wings.set_value(0);
 	leftRotate.reset_position();
@@ -70,7 +71,7 @@ void autonomous() {
 			OverAWP();
 			break;
 		case 2:
-			//progSkills();
+			progSkills();
 			break;
 		case 3:
 			UnderAWP();
@@ -97,7 +98,6 @@ void autonomous() {
 
 
 void opcontrol() {
-	pros::Task flywheel_task(flywheel_t);
 	
 	while (true) {
 		
@@ -123,37 +123,25 @@ void opcontrol() {
 			}
 		}
 
-		//Flywheel
+		//Wings
 		if(master.get_digital_new_press(DIGITAL_R1)){
-			if (abs(flywheelSpeed) == 600){
-				flywheelSpeed = 0;
-			} else if (flywheelSpeed == 0){
-				flywheelSpeed = 600*highArc;
+			if(wingsOut==false){
+				wings.set_value(1);
+				wingsOut=true;
+			} else if (wingsOut==true){
+				wings.set_value(0);
+				wingsOut=false;
 			}
 		}
 
 		if(master.get_digital_new_press(DIGITAL_R2)){
-			if (highArc == 1){
-				highArc = -1;
-			} else if (highArc == -1){
-				highArc = 1;
+			if(hangOut==true){
+				endgame.set_value(1);
+				hangOut = false;
+			} else if (hangOut == false){
+				endgame.set_value(0);
+				hangOut = true;
 			}
-		}
-
-		//Blocker blocker
-		if(master.get_digital_new_press(DIGITAL_UP)){ //Matchload mode
-			blockerblocker.set_value(1);
-		} else if (master.get_digital_new_press(DIGITAL_DOWN)){ //Ingame mode
-			blockerblocker.set_value(0);
-		}
-
-		//Wings
-		if(master.get_digital_new_press(DIGITAL_RIGHT)){
-			wings.set_value(1);
-			
-		} else if (master.get_digital_new_press(DIGITAL_LEFT)){
-			
-			wings.set_value(0);
 		}
 
 		if(master.get_digital_new_press(DIGITAL_Y)){
@@ -166,33 +154,21 @@ void opcontrol() {
 			}
 		}	
 
+		//Endgame
 		if(master.get_digital_new_press(DIGITAL_X)){
-			endgame.set_value(1);
-		} else if (master.get_digital_new_press(DIGITAL_B)){
-			endgame.set_value(0);
+			if (driveTrainReverse==true){
+				driveTrainReverse=false;
+			} else if (driveTrainReverse==false){
+				driveTrainReverse=true;
+			}
 		}
+
 		
 		if(master.get_digital_new_press(DIGITAL_A)){
-			/*switch (selectedAuton){
-				case 0:
-					OverPreload();
-					break;
-				case 1:
-					OverAWP();
-					break;
-				case 2:
-					UnderPreload();
-					break;
-				case 3:
-					UnderAWP();
-					break;
-				case 4:
-					UnderAWP5Points();
-					break;
-			}*/
+			
 			switch (selectedAuton){
 				case 0:
-					OverAWP5Points();
+					drivePID(perry.distToTicks(24),perry.driveKP, perry.driveKI, perry.driveKD);
 					break;
 				case 1:
 					OverAWP();

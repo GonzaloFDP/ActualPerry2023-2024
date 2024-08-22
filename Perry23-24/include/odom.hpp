@@ -22,7 +22,7 @@ void odom(){
     double sideDistance = 2.37;
 
     while(true){
-        //Distance that the wheels have moved in each interation
+        //Distance that the wheels have moved in each interatione
         double deltaLeft = leftRotate.get_position() - prevLeft;
         double deltaRight = rightRotate.get_position() - prevRight;
         double deltaSide = sideRotate.get_position() - prevSide;
